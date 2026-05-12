@@ -170,9 +170,9 @@ h1,h2,h3,h4 {
   }
 
   .wrap { max-width: 100%; padding: 0; }
-  #home .hero { text-align: left; padding: 0 0 40px; }
-  #home .hero p { margin-left: 0; }
-  #home .hero-cta { justify-content: flex-start; }
+  #home .hero { text-align: center; padding: 0 0 40px; }
+  #home .hero p { margin-left: auto; margin-right: auto; }
+  #home .hero-cta { justify-content: center; }
   #home .stats-strip { margin: 0; }
 }
 
@@ -489,9 +489,9 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 @media (min-width: 900px) {
   .feature-grid { max-width: 100%; }
   .stats-strip { max-width: 100%; margin: 0; }
-  .hero { padding: 0 0 40px; text-align: left; max-width: 100%; }
-  .hero p { margin-left: 0; }
-  .hero-cta { justify-content: flex-start; }
+  .hero { padding: 0 0 40px; text-align: center; max-width: 100%; }
+  .hero p { margin-left: auto; margin-right: auto; }
+  .hero-cta { justify-content: center; }
 }
 
 .feature-card {
@@ -1257,8 +1257,8 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   <div class="desktop-hide-when-large">
     <div class="hero animate-in">
       <div class="hero-badge">🔧 Trusted Mechanics Network</div>
-      <h1>Your car<br>deserves the<br><span>best care</span></h1>
-      <p>Book certified mechanics near you. Fast, reliable, transparent.</p>
+      <h1>A Good<br>Mind Begins With<br><span>A Fresh Car</span></h1>
+      <p>Book trusted mechanics near you. Quickly & Safely.</p>
       <div class="hero-cta">
         <button class="pill-btn pill-btn-primary pill-btn-lg" onclick="navigate('signup')">Get Started</button>
         <button class="pill-btn pill-btn-ghost pill-btn-lg" onclick="navigate('login')">Sign In</button>
@@ -1296,8 +1296,8 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     <div class="desktop-main">
       <div class="hero">
         <div class="hero-badge">🔧 Trusted Mechanics Network</div>
-        <h1>Your car<br>deserves<br>the <span>best</span></h1>
-        <p>Book certified mechanics near you. Fast, reliable, transparent service you can count on.</p>
+        <h1>A Good Mind Begins With A Fresh<span>Car</span></h1>
+        <p>Book trusted mechanics near you. Quickly & Safely.</p>
         <div class="hero-cta">
           <button class="pill-btn pill-btn-primary pill-btn-lg" onclick="navigate('signup')">Get Started</button>
           <button class="pill-btn pill-btn-ghost pill-btn-lg" onclick="navigate('login')">Sign In</button>
@@ -1330,34 +1330,6 @@ textarea.form-input { resize: vertical; min-height: 90px; }
       </div>
     </div>
 
-    <!-- Right: sidebar with info -->
-    <div class="desktop-sidebar">
-      <div class="sidebar-info-card">
-        <h3>Why TKT?</h3>
-        <ul class="sidebar-info-list">
-          <li><span>✅</span><span>All mechanics are background-checked and certified</span></li>
-          <li><span>⚡</span><span>Average response time under 30 minutes</span></li>
-          <li><span>💳</span><span>Transparent pricing, no hidden fees</span></li>
-          <li><span>🌍</span><span>Available across major cities nationwide</span></li>
-          <li><span>🔒</span><span>Secure payments and data protection</span></li>
-        </ul>
-      </div>
-      <div class="sidebar-info-card">
-        <h3>How It Works</h3>
-        <ul class="sidebar-info-list">
-          <li><span>1️⃣</span><span>Create your free account in under a minute</span></li>
-          <li><span>2️⃣</span><span>Describe your vehicle issue and location</span></li>
-          <li><span>3️⃣</span><span>Get matched with the nearest certified mechanic</span></li>
-          <li><span>4️⃣</span><span>Track progress and pay securely when done</span></li>
-        </ul>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <button class="pill-btn pill-btn-primary pill-btn-full pill-btn-lg" onclick="navigate('signup')">Create Free Account</button>
-        <button class="pill-btn pill-btn-ghost pill-btn-full" onclick="navigate('login')">Already a Member? Sign In</button>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ===================== LOGIN PAGE ===================== -->
 <section id="login" class="page">
@@ -1642,10 +1614,10 @@ textarea.form-input { resize: vertical; min-height: 90px; }
       <!-- Trust -->
       <div id="sCard1" class="tab-panel active">
         <div class="trust-grid stagger">
-          <div class="trust-card"><div class="trust-icon">✅</div><div class="trust-title">Verified Mechanics</div><div class="trust-desc">All mechanics go through a rigorous vetting process.</div></div>
-          <div class="trust-card"><div class="trust-icon">🚨</div><div class="trust-title">24/7 Emergency</div><div class="trust-desc">Round-the-clock emergency support available.</div></div>
-          <div class="trust-card"><div class="trust-icon">⭐</div><div class="trust-title">Real Reviews</div><div class="trust-desc">Genuine feedback from real customers only.</div></div>
-          <div class="trust-card"><div class="trust-icon">🔒</div><div class="trust-title">Secure Service</div><div class="trust-desc">Your data and bookings are always protected.</div></div>
+          <div class="trust-card"><div class="trust-icon"></div><div class="trust-title">Verified Mechanics</div><div class="trust-desc">All mechanics go through a rigorous vetting process.</div></div>
+          <div class="trust-card"><div class="trust-icon"></div><div class="trust-title">24/7 Emergency</div><div class="trust-desc">Round-the-clock emergency support available.</div></div>
+          <div class="trust-card"><div class="trust-icon"></div><div class="trust-title">Real Reviews</div><div class="trust-desc">Genuine feedback from real customers only.</div></div>
+          <div class="trust-card"><div class="trust-icon"></div><div class="trust-title">Secure Service</div><div class="trust-desc">Your data and bookings are always protected.</div></div>
         </div>
       </div>
 
