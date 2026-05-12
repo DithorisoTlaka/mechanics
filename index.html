@@ -122,32 +122,19 @@ h1,h2,h3,h4 {
    DESKTOP LAYOUT — two-column content wrapper
    ============================================================ */
 @media (min-width: 900px) {
-  /* Home page desktop: hero + sidebar layout */
+  /* Home page desktop: single column layout (sidebar removed) */
   .desktop-layout {
-    display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 0;
-    max-width: 1180px;
+    display: block;
+    max-width: 760px;
     margin: 0 auto;
     padding: 0 40px;
     position: relative;
     z-index: 1;
     min-height: calc(100vh - 70px);
-    align-items: start;
   }
 
-  .desktop-main { padding: 60px 40px 60px 0; }
-  .desktop-sidebar {
-    padding: 60px 0 60px 40px;
-    border-left: 1px solid var(--border);
-    position: sticky;
-    top: 70px;
-    height: calc(100vh - 70px);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
+  .desktop-main { padding: 60px 0 60px 0; }
+  .desktop-sidebar { display: none !important; }
 
   /* Form pages: centered wider */
   .form-page-desktop {
@@ -1204,17 +1191,37 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 480px) {
+@media (max-width: 899px) {
   .feature-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .feat-icon { width: 34px; height: 34px; font-size: 15px; }
   .feat-title { font-size: 11px; }
   .feat-desc { display: none; }
   .nav { padding: 0 16px; }
+  /* Mobile: compact toggle — no label, no icon, just small thumb pill */
   .dm-toggle-label { display: none; }
+  .dm-icon { display: none; }
+  .dm-toggle {
+    padding: 4px 5px;
+    gap: 0;
+  }
+  .dm-toggle-thumb {
+    width: 28px;
+    height: 16px;
+  }
+  .dm-toggle-thumb::after {
+    width: 10px;
+    height: 10px;
+    top: 3px;
+    left: 3px;
+  }
+  [data-theme="light"] .dm-toggle-thumb::after {
+    transform: translateX(12px);
+  }
 }
 @media (max-width: 360px) {
-  .hero h1 { font-size: 38px; }
+  .hero h1 { font-size: 36px; }
   .trust-grid { grid-template-columns: 1fr; }
+  .nav-actions .pill-btn { padding: 8px 14px; font-size: 13px; }
 }
 </style>
 </head>
