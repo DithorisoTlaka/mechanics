@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TKT Mechanics</title>
-<!-- Barlow Condensed + Barlow: same clean industrial character as reference site -->
+<!-- Barlow Condensed + Barlow -->
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   DESIGN TOKENS — DARK & LIGHT THEMES
-   ============================================================ */
+
+   
+/* DARK & LIGHT THEMES */
 :root {
   --teal:      #0fd4b8;
   --teal-mid:  #0aab95;
@@ -23,6 +23,7 @@
   --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
+   
 /* DARK MODE (default) */
 [data-theme="dark"] {
   --ink:       #0a0e1a;
@@ -48,6 +49,7 @@
   --mesh3: rgba(28,35,51,0.9);
 }
 
+   
 /* LIGHT MODE */
 [data-theme="light"] {
   --ink:       #f0f4ff;
@@ -73,9 +75,7 @@
   --mesh3: rgba(240,244,255,0.95);
 }
 
-/* ============================================================
-   RESET & BASE
-   ============================================================ */
+/* RESET & BASE */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
@@ -102,27 +102,23 @@ body::before {
   transition: background 0.35s ease;
 }
 
-/* ============================================================
-   TYPOGRAPHY
-   ============================================================ */
+/* TYPOGRAPHY */
 h1,h2,h3,h4 {
   font-family: 'Barlow Condensed', sans-serif;
   line-height: 1.1;
   letter-spacing: -0.5px;
 }
 
-/* ============================================================
-   LAYOUT HELPERS
-   ============================================================ */
+/* LAYOUT HELPERS */
 .wrap { max-width: 520px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 .page { display: none; min-height: 100vh; position: relative; z-index: 1; }
 .page.active { display: block; }
 
 /* ============================================================
-   DESKTOP LAYOUT — two-column content wrapper
+   DESKTOP VERSION 
    ============================================================ */
 @media (min-width: 900px) {
-  /* Home page desktop: single column layout (sidebar removed) */
+  /* Home page desktop */
   .desktop-layout {
     display: block;
     max-width: 760px;
@@ -136,14 +132,14 @@ h1,h2,h3,h4 {
   .desktop-main { padding: 60px 0 60px 0; }
   .desktop-sidebar { display: none !important; }
 
-  /* Form pages: centered wider */
+  /* Form pages */
   .form-page-desktop {
     max-width: 560px;
     margin: 0 auto;
     padding: 0 40px;
   }
 
-  /* Dashboard: wider with sidebar */
+  /* Dashboard */
   .dash-desktop-layout {
     display: grid;
     grid-template-columns: 260px 1fr;
@@ -204,7 +200,7 @@ h1,h2,h3,h4 {
 .nav-actions { display: flex; gap: 10px; }
 
 /* ============================================================
-   DARK MODE TOGGLE — pill shaped
+   DARK MODE TOGGLE
    ============================================================ */
 .dm-toggle {
   display: flex;
@@ -448,7 +444,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   animation: fadeUp 0.6s 0.3s ease both;
 }
 
-/* Stats strip */
+/* Stats */
 .stats-strip {
   display: flex; gap: 0; margin: 0 24px;
   background: var(--card-bg);
@@ -541,7 +537,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 }
 .feat-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
 
-/* Desktop sidebar content */
+/* Desktop content */
 .sidebar-info-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -565,7 +561,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 .sidebar-info-list li span:first-child { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
 
 /* ============================================================
-   FORM PAGES (Login / Signup)
+   (Login / Signup)
    ============================================================ */
 .form-page {
   min-height: 100vh;
@@ -866,7 +862,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 }
 
 /* ============================================================
-   MODAL / BOTTOM SHEET — FIXED POSITION, NO SCROLL ON SWITCH
+   MODAL / BOTTOM SHEET
    ============================================================ */
 .sr-overlay {
   position: fixed; inset: 0;
@@ -898,7 +894,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 }
 .sr-overlay.open .sr-sheet { transform: translateY(0); }
 
-/* Desktop: centered dialog with fixed height */
+/* Desktop: centered dial */
 @media (min-width: 640px) {
   .sr-overlay { align-items: center; }
   .sr-sheet {
@@ -918,7 +914,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   flex-shrink: 0;
 }
 
-/* Tab nav — floating pill buttons */
+/* Tab nav */
 .sr-tab-nav {
   display: flex;
   gap: 8px;
@@ -956,7 +952,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   box-shadow: 0 4px 12px rgba(15,212,184,0.35);
 }
 
-/* Scrollable body — only this part scrolls */
+/* Scrollable body */
 .sr-body {
   flex: 1;
   overflow-y: auto;
@@ -1199,7 +1195,8 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   .feat-title { font-size: 11px; }
   .feat-desc { display: none; }
   .nav { padding: 0 16px; }
-  /* Mobile: compact toggle — no label, no icon, just small thumb pill */
+   
+  /* Mobile Dark Mode Toggle */
   .dm-toggle-label { display: none; }
   .dm-icon { display: none; }
   .dm-toggle {
@@ -1233,6 +1230,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 <nav class="nav" id="mainNav">
   <div class="nav-brand">TKT Mechanics</div>
   <div class="nav-right">
+     
     <!-- Dark Mode Toggle -->
     <button class="dm-toggle" id="darkModeToggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
       <span class="dm-toggle-label" id="dmLabel">Dark</span>
@@ -1823,15 +1821,13 @@ document.getElementById('safeReliableModal').addEventListener('click', (e) => {
 });
 
 /* ============================================================
-   Safe & Reliable tab switching — SHEET STAYS STILL
-   The sr-body scrolls independently. Only tab-panel visibility
-   changes; the sheet height and position are fixed by CSS.
+   Safe & Reliable tab
    ============================================================ */
 document.querySelectorAll('#safeReliableModal .tab-item').forEach(tab => {
   tab.addEventListener('click', () => {
-    // Remove active from all tabs
+     
     document.querySelectorAll('#safeReliableModal .tab-item').forEach(t => t.classList.remove('active'));
-    // Hide all panels (no layout shift — they're positioned inside fixed-height sr-body)
+    
     document.querySelectorAll('#safeReliableModal .tab-panel').forEach(p => p.classList.remove('active'));
     // Activate selected
     tab.classList.add('active');
