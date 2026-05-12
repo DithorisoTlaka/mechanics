@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TKT Mechanics</title>
+<!-- Barlow Condensed + Barlow: same clean industrial character as reference site -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS — DARK & LIGHT THEMES
+   ============================================================ */
+:root {
+  --teal:      #0fd4b8;
+  --teal-mid:  #0aab95;
+  --teal-deep: #067a6a;
+  --coral:     #ff6b5b;
+  --coral-lt:  #ffe8e5;
+  --amber:     #ffb347;
+  --radius:    20px;
+  --radius-sm: 12px;
+  --radius-pill: 999px;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* DARK MODE (default) */
+[data-theme="dark"] {
+  --ink:       #0a0e1a;
+  --ink-soft:  #1c2333;
+  --surface:   #131824;
+  --surface2:  #1a2133;
+  --white:     #ffffff;
+  --muted:     #7a8aaa;
+  --muted2:    #5a6a8a;
+  --border:    rgba(255,255,255,0.1);
+  --border-teal: rgba(15,212,184,0.2);
+  --card-bg:   rgba(255,255,255,0.04);
+  --card-hover: rgba(255,255,255,0.07);
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.2);
+  --shadow-md: 0 8px 32px rgba(0,0,0,0.35);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+  --nav-bg:    rgba(10,14,26,0.85);
+  --modal-bg:  #131824;
+  --input-bg:  rgba(255,255,255,0.07);
+  --input-border: rgba(255,255,255,0.1);
+  --mesh1: rgba(15,212,184,0.16);
+  --mesh2: rgba(255,107,91,0.1);
+  --mesh3: rgba(28,35,51,0.9);
+}
+
+/* LIGHT MODE */
+[data-theme="light"] {
+  --ink:       #f0f4ff;
+  --ink-soft:  #e2e8f4;
+  --surface:   #ffffff;
+  --surface2:  #f4f7fd;
+  --white:     #0d1220;
+  --muted:     #5a6a8a;
+  --muted2:    #8898b8;
+  --border:    rgba(0,0,0,0.1);
+  --border-teal: rgba(10,171,149,0.3);
+  --card-bg:   rgba(255,255,255,0.9);
+  --card-hover: rgba(255,255,255,1);
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-md: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.18);
+  --nav-bg:    rgba(240,244,255,0.92);
+  --modal-bg:  #ffffff;
+  --input-bg:  rgba(0,0,0,0.04);
+  --input-border: rgba(0,0,0,0.12);
+  --mesh1: rgba(15,212,184,0.08);
+  --mesh2: rgba(255,107,91,0.05);
+  --mesh3: rgba(240,244,255,0.95);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--ink);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, var(--mesh1) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 80%, var(--mesh2) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, var(--mesh3) 0%, var(--ink) 100%);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.35s ease;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1,h2,h3,h4 {
+  font-family: 'Barlow Condensed', sans-serif;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+/* ============================================================
+   LAYOUT HELPERS
+   ============================================================ */
+.wrap { max-width: 520px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+.page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.page.active { display: block; }
+
+/* ============================================================
+   DESKTOP LAYOUT — two-column content wrapper
+   ============================================================ */
+@media (min-width: 900px) {
+  /* Home page desktop: hero + sidebar layout */
+  .desktop-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 0;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 70px);
+    align-items: start;
+  }
+
+  .desktop-main { padding: 60px 40px 60px 0; }
+  .desktop-sidebar {
+    padding: 60px 0 60px 40px;
+    border-left: 1px solid var(--border);
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Form pages: centered wider */
+  .form-page-desktop {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* Dashboard: wider with sidebar */
+  .dash-desktop-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1180px;
+    margin: 0 auto;
+    min-height: calc(100vh - 70px);
+  }
+
+  .dash-desktop-nav {
+    padding: 32px 24px;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dash-desktop-content {
+    padding: 32px 40px;
+    overflow-y: auto;
+  }
+
+  .wrap { max-width: 100%; padding: 0; }
+  #home .hero { text-align: left; padding: 0 0 40px; }
+  #home .hero p { margin-left: 0; }
+  #home .hero-cta { justify-content: flex-start; }
+  #home .stats-strip { margin: 0; }
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav {
+  position: sticky; top: 0; z-index: 300;
+  background: var(--nav-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border-teal);
+  padding: 0 24px;
+  height: 70px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.nav-brand {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--teal);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.nav-actions { display: flex; gap: 10px; }
+
+/* ============================================================
+   DARK MODE TOGGLE — pill shaped
+   ============================================================ */
+.dm-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 5px 6px 5px 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.dm-toggle:hover {
+  border-color: var(--teal);
+  background: rgba(15,212,184,0.08);
+}
+
+.dm-toggle-label {
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  transition: color 0.3s;
+}
+
+.dm-toggle:hover .dm-toggle-label { color: var(--teal); }
+
+.dm-toggle-thumb {
+  width: 32px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--muted2);
+  position: relative;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .dm-toggle-thumb { background: var(--teal); }
+
+.dm-toggle-thumb::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+[data-theme="light"] .dm-toggle-thumb::after { transform: translateX(14px); }
+
+.dm-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.pill-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-pill);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 22px;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.pill-btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1.5px solid var(--border);
+}
+.pill-btn-ghost:hover {
+  color: var(--white);
+  border-color: rgba(15,212,184,0.5);
+  background: rgba(15,212,184,0.06);
+}
+
+.pill-btn-primary {
+  background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+  color: #0a0e1a;
+  box-shadow: 0 4px 14px rgba(15,212,184,0.35);
+  font-weight: 800;
+}
+.pill-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15,212,184,0.5);
+}
+
+.pill-btn-coral {
+  background: linear-gradient(135deg, var(--coral), #e84c3d);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255,107,91,0.35);
+  font-weight: 800;
+}
+.pill-btn-coral:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,107,91,0.5); }
+
+.pill-btn-outline-teal {
+  background: rgba(15,212,184,0.1);
+  color: var(--teal);
+  border: 1.5px solid rgba(15,212,184,0.35);
+  font-weight: 700;
+}
+.pill-btn-outline-teal:hover {
+  background: rgba(15,212,184,0.18);
+  border-color: var(--teal);
+}
+
+.pill-btn-lg { padding: 15px 36px; font-size: 16px; }
+.pill-btn-full { width: 100%; }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.glass-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 28px 24px;
+  transition: var(--transition);
+}
+.glass-card:hover {
+  background: var(--card-hover);
+  border-color: var(--border-teal);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-field { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+.form-input {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  transition: var(--transition);
+  -webkit-appearance: none;
+}
+
+.form-input::placeholder { color: var(--muted2); }
+.form-input:focus {
+  outline: none;
+  border-color: var(--teal);
+  background: rgba(15,212,184,0.06);
+  box-shadow: 0 0 0 4px rgba(15,212,184,0.1);
+}
+
+[data-theme="light"] .form-input { color: #0d1220; }
+[data-theme="light"] select.form-input option { background: #fff; color: #0d1220; }
+[data-theme="dark"]  select.form-input option { background: #1c2333; color: #fff; }
+
+textarea.form-input { resize: vertical; min-height: 90px; }
+
+/* ============================================================
+   HOME PAGE
+   ============================================================ */
+#home { padding-bottom: 60px; }
+
+.hero {
+  padding: 60px 24px 40px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(15,212,184,0.12);
+  border: 1px solid rgba(15,212,184,0.3);
+  border-radius: var(--radius-pill);
+  padding: 6px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  animation: fadeDown 0.6s ease both;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.hero-badge::before { content: '●'; font-size: 8px; animation: pulse 2s infinite; }
+
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.hero h1 {
+  font-size: clamp(42px, 10vw, 72px);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -1px;
+  margin-bottom: 18px;
+  animation: fadeUp 0.6s 0.1s ease both;
+  text-transform: uppercase;
+}
+.hero h1 span { color: var(--teal); }
+.hero p {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+  max-width: 360px;
+  margin: 0 auto 36px;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.hero-cta {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+
+/* Stats strip */
+.stats-strip {
+  display: flex; gap: 0; margin: 0 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.6s 0.4s ease both;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.stat-item {
+  flex: 1;
+  padding: 20px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 26px;
+  color: var(--teal);
+  letter-spacing: 0.5px;
+}
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; }
+
+/* Feature cards grid */
+.feature-grid {
+  padding: 28px 24px 40px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (min-width: 900px) {
+  .feature-grid { max-width: 100%; }
+  .stats-strip { max-width: 100%; margin: 0; }
+  .hero { padding: 0 0 40px; text-align: left; max-width: 100%; }
+  .hero p { margin-left: 0; }
+  .hero-cta { justify-content: flex-start; }
+}
+
+.feature-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::after {
+  content: '';
+  position: absolute; bottom: -30px; right: -30px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  opacity: 0; transition: var(--transition);
+}
+.feature-card:hover { transform: translateY(-5px); }
+.feature-card:hover::after { opacity: 0.12; bottom: -15px; right: -15px; }
+
+.feature-card.teal { border-color: rgba(15,212,184,0.2); }
+.feature-card.teal::after { background: var(--teal); }
+.feature-card.teal:hover { background: rgba(15,212,184,0.08); border-color: rgba(15,212,184,0.4); box-shadow: 0 8px 24px rgba(15,212,184,0.15); }
+.feature-card.coral { border-color: rgba(255,107,91,0.2); }
+.feature-card.coral::after { background: var(--coral); }
+.feature-card.coral:hover { background: rgba(255,107,91,0.08); border-color: rgba(255,107,91,0.4); box-shadow: 0 8px 24px rgba(255,107,91,0.15); }
+.feature-card.shield { border-color: rgba(15,212,184,0.15); }
+.feature-card.shield::after { background: var(--teal); }
+.feature-card.shield:hover { background: rgba(15,212,184,0.06); border-color: rgba(15,212,184,0.3); box-shadow: 0 8px 24px rgba(15,212,184,0.1); }
+
+.feat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+.feat-icon.teal { background: rgba(15,212,184,0.15); }
+.feat-icon.coral { background: rgba(255,107,91,0.15); }
+.feat-icon.shield { background: rgba(15,212,184,0.1); }
+
+.feat-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 5px;
+  line-height: 1.2;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.feat-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* Desktop sidebar content */
+.sidebar-info-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+}
+.sidebar-info-card h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+}
+.sidebar-info-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.sidebar-info-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; color: var(--muted); line-height: 1.5;
+}
+.sidebar-info-list li span:first-child { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+
+/* ============================================================
+   FORM PAGES (Login / Signup)
+   ============================================================ */
+.form-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+@media (min-width: 900px) {
+  .form-page {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .form-page-header { padding: 40px 0 0; }
+  .form-body { padding: 32px 0 60px; }
+}
+
+.form-page-header {
+  padding: 24px 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.back-btn {
+  width: 42px; height: 42px;
+  border-radius: var(--radius-pill);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.back-btn:hover { background: var(--card-hover); border-color: var(--teal); }
+
+.form-page-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-body {
+  flex: 1;
+  padding: 32px 24px 40px;
+  overflow-y: auto;
+}
+
+.form-headline { margin-bottom: 32px; }
+.form-headline h2 {
+  font-size: clamp(32px, 8vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.form-headline p { color: var(--muted); font-size: 15px; }
+
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 22px 0;
+  color: var(--muted); font-size: 12px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1;
+  height: 1px; background: var(--border);
+}
+
+.google-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.google-btn:hover { background: var(--card-hover); border-color: rgba(66,133,244,0.5); }
+
+.google-icon {
+  width: 18px; height: 18px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234285F4' d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'/%3E%3Cpath fill='%2334A853' d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'/%3E%3Cpath fill='%23FBBC05' d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'/%3E%3Cpath fill='%23EA4335' d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'/%3E%3C/svg%3E") no-repeat center/contain;
+  flex-shrink: 0;
+}
+
+.form-footer-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--muted); }
+.form-footer-link a, .form-footer-link span { color: var(--teal); font-weight: 700; cursor: pointer; text-decoration: none; }
+.form-footer-link a:hover, .form-footer-link span:hover { text-decoration: underline; }
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+#dashboard { background: transparent; }
+
+.dash-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 900px) {
+  .dash-header { padding: 32px 40px 24px; }
+}
+
+.dash-header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.dash-greeting { font-size: 12px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; font-family: 'Barlow Condensed', sans-serif; }
+.dash-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.dash-role-badge {
+  display: inline-flex; align-items: center;
+  background: rgba(15,212,184,0.12);
+  border: 1px solid rgba(15,212,184,0.3);
+  border-radius: var(--radius-pill);
+  padding: 5px 16px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+.dash-body { padding: 24px; }
+@media (min-width: 900px) { .dash-body { padding: 0; } }
+
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--white);
+}
+.section-title::before {
+  content: '';
+  width: 4px; height: 20px;
+  background: linear-gradient(180deg, var(--teal), var(--teal-deep));
+  border-radius: 2px;
+}
+
+/* Desktop dash sidebar nav */
+.dash-nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+.dash-nav-item:hover { background: var(--card-bg); color: var(--white); border-color: var(--border); }
+.dash-nav-item.active { background: rgba(15,212,184,0.1); color: var(--teal); border-color: rgba(15,212,184,0.25); }
+.dash-nav-item span { font-size: 18px; }
+
+/* Stats row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr; }
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px 16px;
+  text-align: center;
+}
+.stat-card-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--teal);
+}
+.stat-card-label { font-size: 11px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+
+/* Table */
+.table-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.data-table { width: 100%; border-collapse: collapse; min-width: 460px; }
+.data-table thead tr { background: rgba(15,212,184,0.07); border-bottom: 1px solid rgba(15,212,184,0.15); }
+.data-table th {
+  padding: 13px 16px;
+  text-align: left;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--teal);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--white);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  opacity: 0.85;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--card-hover); }
+
+.status-pill {
+  display: inline-flex; align-items: center;
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+}
+.status-pending  { background: rgba(255,179,71,0.15);  color: var(--amber); }
+.status-assigned { background: rgba(15,212,184,0.15);  color: var(--teal); }
+.status-paid     { background: rgba(46,213,115,0.15);  color: #2ed573; }
+.status-unpaid   { background: rgba(255,107,91,0.15);  color: var(--coral); }
+
+.approve-btn {
+  background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+  color: #0a0e1a;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'Barlow', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.approve-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(15,212,184,0.4); }
+
+/* Collapse toggle */
+.collapse-toggle {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,212,184,0.1);
+  border: 1.5px solid rgba(15,212,184,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--teal);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 13px 20px;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+  margin-bottom: 16px;
+}
+.collapse-toggle:hover { background: rgba(15,212,184,0.18); }
+
+.mechanic-form-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 24px;
+  display: none;
+}
+
+/* ============================================================
+   MODAL / BOTTOM SHEET — FIXED POSITION, NO SCROLL ON SWITCH
+   ============================================================ */
+.sr-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.sr-overlay.open { opacity: 1; pointer-events: all; }
+
+.sr-sheet {
+  background: var(--modal-bg);
+  border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 500px;
+  /* KEY FIX: fixed height so switching tabs doesn't change sheet size */
+  height: 82vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.35s ease;
+  overflow: hidden;
+}
+.sr-overlay.open .sr-sheet { transform: translateY(0); }
+
+/* Desktop: centered dialog with fixed height */
+@media (min-width: 640px) {
+  .sr-overlay { align-items: center; }
+  .sr-sheet {
+    border-radius: 22px;
+    max-width: 580px;
+    height: 80vh;
+    transform: scale(0.93) translateY(24px);
+  }
+  .sr-overlay.open .sr-sheet { transform: scale(1) translateY(0); }
+  .sr-sheet .modal-handle { display: none; }
+}
+
+.sr-head {
+  padding: 18px 22px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Tab nav — flush below header, does NOT scroll with body */
+.sr-tab-nav {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.sr-tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-item {
+  flex-shrink: 0;
+  padding: 13px 22px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.tab-item:hover { color: var(--white); }
+.tab-item.active {
+  color: var(--teal);
+  border-bottom-color: var(--teal);
+  background: rgba(15,212,184,0.05);
+}
+
+/* Scrollable body — only this part scrolls */
+.sr-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-panel { display: none; padding: 22px; }
+.tab-panel.active { display: block; animation: fadeUp 0.3s ease both; }
+
+/* Trust cards */
+.trust-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.trust-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+  transition: var(--transition);
+}
+.trust-card:hover { background: rgba(15,212,184,0.07); border-color: rgba(15,212,184,0.25); transform: translateY(-3px); }
+.trust-icon { font-size: 26px; margin-bottom: 10px; }
+.trust-title { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; margin-bottom: 4px; color: var(--white); text-transform: uppercase; letter-spacing: 0.3px; }
+.trust-desc { font-size: 12px; color: var(--muted); }
+
+/* Mechanic cards */
+.mech-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 12px;
+  transition: var(--transition);
+}
+.mech-card:hover { background: var(--card-hover); transform: translateX(4px); }
+.mech-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal-deep));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #0a0e1a;
+  flex-shrink: 0;
+}
+.mech-name { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 800; color: var(--white); text-transform: uppercase; letter-spacing: 0.3px; }
+.mech-stars { color: var(--amber); font-size: 13px; margin-top: 2px; }
+
+/* Star rating */
+.star-rating { display: flex; gap: 6px; margin-bottom: 14px; }
+.star-rating span {
+  font-size: 28px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: var(--transition);
+  line-height: 1;
+}
+.star-rating span:hover,
+.star-rating span.active { color: var(--amber); transform: scale(1.15); }
+
+/* ============================================================
+   FIND MECHANIC MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal-sheet {
+  background: var(--modal-bg);
+  border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0 0 40px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.35s ease;
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+@media (min-width: 640px) {
+  .modal-overlay { align-items: center; }
+  .modal-sheet {
+    border-radius: 20px;
+    max-width: 560px;
+    max-height: 85vh;
+    transform: scale(0.93) translateY(20px);
+  }
+  .modal-overlay.open .modal-sheet { transform: scale(1) translateY(0); }
+  .modal-sheet .modal-handle { display: none; }
+}
+
+.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 14px auto 6px; }
+.modal-head {
+  padding: 16px 24px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.modal-close {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  font-weight: 700;
+}
+.modal-close:hover { background: var(--card-hover); color: var(--white); border-color: var(--teal); }
+.modal-body { padding: 24px; }
+
+/* Reset password modal */
+.reset-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 24px;
+}
+.reset-modal-overlay.open { opacity: 1; pointer-events: all; }
+.reset-modal-box {
+  background: var(--modal-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  width: 100%; max-width: 400px;
+  transform: scale(0.9);
+  transition: transform 0.3s ease, background 0.35s ease;
+}
+.reset-modal-overlay.open .reset-modal-box { transform: scale(1); }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeUp 0.4s ease both; }
+.stagger > * { animation: fadeUp 0.4s ease both; }
+.stagger > *:nth-child(1) { animation-delay: 0s; }
+.stagger > *:nth-child(2) { animation-delay: 0.07s; }
+.stagger > *:nth-child(3) { animation-delay: 0.14s; }
+.stagger > *:nth-child(4) { animation-delay: 0.21s; }
+.stagger > *:nth-child(5) { animation-delay: 0.28s; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast-container {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+  width: max-content; max-width: calc(100vw - 40px);
+}
+.toast {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 13px 26px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  animation: toastIn 0.3s ease both;
+  pointer-events: all;
+  font-family: 'Barlow', sans-serif;
+}
+.toast.success { border-color: rgba(15,212,184,0.4); color: var(--teal); }
+.toast.error   { border-color: rgba(255,107,91,0.4); color: var(--coral); }
+.toast.info    { border-color: rgba(255,179,71,0.4); color: var(--amber); }
+.toast.out     { animation: toastOut 0.3s ease both; }
+
+@keyframes toastIn  { from { opacity: 0; transform: translateY(16px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes toastOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(16px) scale(0.9); } }
+
+/* ============================================================
+   SKELETON
+   ============================================================ */
+.skeleton {
+  background: linear-gradient(90deg, var(--card-bg) 0%, rgba(255,255,255,0.08) 50%, var(--card-bg) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+  height: 16px;
+}
+@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.hidden { display: none !important; }
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-16 { margin-bottom: 16px; }
+.text-muted { color: var(--muted); }
+.text-teal  { color: var(--teal); }
+.text-coral { color: var(--coral); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  .feature-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .feat-icon { width: 34px; height: 34px; font-size: 15px; }
+  .feat-title { font-size: 11px; }
+  .feat-desc { display: none; }
+  .nav { padding: 0 16px; }
+  .dm-toggle-label { display: none; }
+}
+@media (max-width: 360px) {
+  .hero h1 { font-size: 38px; }
+  .trust-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== NAV ===================== -->
+<nav class="nav" id="mainNav">
+  <div class="nav-brand">TKT Mechanics</div>
+  <div class="nav-right">
+    <!-- Dark Mode Toggle -->
+    <button class="dm-toggle" id="darkModeToggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+      <span class="dm-toggle-label" id="dmLabel">Dark</span>
+      <div class="dm-toggle-thumb" id="dmThumb"></div>
+      <span class="dm-icon" id="dmIcon">🌙</span>
+    </button>
+    <div class="nav-actions" id="navButtons">
+      <button class="pill-btn pill-btn-ghost" onclick="navigate('login')">Login</button>
+      <button class="pill-btn pill-btn-primary" onclick="navigate('signup')">Sign Up</button>
+    </div>
+    <div id="navUserArea" class="hidden">
+      <button class="pill-btn pill-btn-ghost" id="mainLogoutBtn">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===================== HOME PAGE ===================== -->
+<section id="home" class="page active">
+
+  <!-- Mobile layout -->
+  <div class="desktop-hide-when-large">
+    <div class="hero animate-in">
+      <div class="hero-badge">🔧 Trusted Mechanics Network</div>
+      <h1>Your car<br>deserves the<br><span>best care</span></h1>
+      <p>Book certified mechanics near you. Fast, reliable, transparent.</p>
+      <div class="hero-cta">
+        <button class="pill-btn pill-btn-primary pill-btn-lg" onclick="navigate('signup')">Get Started</button>
+        <button class="pill-btn pill-btn-ghost pill-btn-lg" onclick="navigate('login')">Sign In</button>
+      </div>
+    </div>
+
+    <div class="stats-strip stagger" style="margin: 0 24px 28px;">
+      <div class="stat-item"><div class="stat-num">200+</div><div class="stat-label">Mechanics</div></div>
+      <div class="stat-item"><div class="stat-num">4.9★</div><div class="stat-label">Rating</div></div>
+      <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">Support</div></div>
+    </div>
+
+    <div class="feature-grid stagger">
+      <div class="feature-card teal" id="findMechanicCard">
+        <div class="feat-icon teal">🔍</div>
+        <div class="feat-title">Find Mechanics</div>
+        <div class="feat-desc">Book certified mechanics near you.</div>
+      </div>
+      <div class="feature-card coral" id="trackService">
+        <div class="feat-icon coral">📍</div>
+        <div class="feat-title">Track Services</div>
+        <div class="feat-desc">Real-time service status updates.</div>
+      </div>
+      <div class="feature-card shield" id="safeReliableCard">
+        <div class="feat-icon shield">🛡️</div>
+        <div class="feat-title">Safe &amp; Reliable</div>
+        <div class="feat-desc">All mechanics verified &amp; trusted.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop layout: two-column -->
+  <div class="desktop-layout" style="display:none;" id="desktopHomeLayout">
+    <!-- Left: hero + features -->
+    <div class="desktop-main">
+      <div class="hero">
+        <div class="hero-badge">🔧 Trusted Mechanics Network</div>
+        <h1>Your car<br>deserves<br>the <span>best</span></h1>
+        <p>Book certified mechanics near you. Fast, reliable, transparent service you can count on.</p>
+        <div class="hero-cta">
+          <button class="pill-btn pill-btn-primary pill-btn-lg" onclick="navigate('signup')">Get Started</button>
+          <button class="pill-btn pill-btn-ghost pill-btn-lg" onclick="navigate('login')">Sign In</button>
+        </div>
+      </div>
+
+      <div class="stats-strip stagger" style="margin: 0 0 32px;">
+        <div class="stat-item"><div class="stat-num">200+</div><div class="stat-label">Mechanics</div></div>
+        <div class="stat-item"><div class="stat-num">4.9★</div><div class="stat-label">Rating</div></div>
+        <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">Support</div></div>
+        <div class="stat-item"><div class="stat-num">5K+</div><div class="stat-label">Jobs Done</div></div>
+      </div>
+
+      <div class="feature-grid stagger" style="padding: 0; max-width:100%;">
+        <div class="feature-card teal" id="findMechanicCardDesk">
+          <div class="feat-icon teal">🔍</div>
+          <div class="feat-title">Find Mechanics</div>
+          <div class="feat-desc">Book certified mechanics near you.</div>
+        </div>
+        <div class="feature-card coral" id="trackServiceDesk">
+          <div class="feat-icon coral">📍</div>
+          <div class="feat-title">Track Services</div>
+          <div class="feat-desc">Real-time service status updates.</div>
+        </div>
+        <div class="feature-card shield" id="safeReliableCardDesk">
+          <div class="feat-icon shield">🛡️</div>
+          <div class="feat-title">Safe &amp; Reliable</div>
+          <div class="feat-desc">All mechanics verified &amp; trusted.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: sidebar with info -->
+    <div class="desktop-sidebar">
+      <div class="sidebar-info-card">
+        <h3>Why TKT?</h3>
+        <ul class="sidebar-info-list">
+          <li><span>✅</span><span>All mechanics are background-checked and certified</span></li>
+          <li><span>⚡</span><span>Average response time under 30 minutes</span></li>
+          <li><span>💳</span><span>Transparent pricing, no hidden fees</span></li>
+          <li><span>🌍</span><span>Available across major cities nationwide</span></li>
+          <li><span>🔒</span><span>Secure payments and data protection</span></li>
+        </ul>
+      </div>
+      <div class="sidebar-info-card">
+        <h3>How It Works</h3>
+        <ul class="sidebar-info-list">
+          <li><span>1️⃣</span><span>Create your free account in under a minute</span></li>
+          <li><span>2️⃣</span><span>Describe your vehicle issue and location</span></li>
+          <li><span>3️⃣</span><span>Get matched with the nearest certified mechanic</span></li>
+          <li><span>4️⃣</span><span>Track progress and pay securely when done</span></li>
+        </ul>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="pill-btn pill-btn-primary pill-btn-full pill-btn-lg" onclick="navigate('signup')">Create Free Account</button>
+        <button class="pill-btn pill-btn-ghost pill-btn-full" onclick="navigate('login')">Already a Member? Sign In</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LOGIN PAGE ===================== -->
+<section id="login" class="page">
+  <div class="form-page">
+    <div class="form-page-header">
+      <button class="back-btn" onclick="navigate('home')">←</button>
+      <div class="form-page-title">Welcome Back</div>
+    </div>
+    <div class="form-body">
+      <div class="form-headline animate-in">
+        <h2>Sign In to<br>Your Account</h2>
+        <p>Access your dashboard and manage your services.</p>
+      </div>
+
+      <form id="login-form" class="stagger">
+        <div class="form-field">
+          <label class="form-label">Your Role</label>
+          <select id="role" class="form-input" required>
+            <option value="">Select your role</option>
+            <option value="client">Client</option>
+            <option value="mechanic">Mechanic</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Password</label>
+          <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <div class="form-footer-link" style="text-align:right; margin-bottom:20px;">
+          <a href="#" id="forgotPasswordLink">Forgot password?</a>
+        </div>
+        <button type="submit" class="pill-btn pill-btn-primary pill-btn-full pill-btn-lg">Sign In</button>
+      </form>
+
+      <div class="divider">or continue with</div>
+      <button class="google-btn" id="googleSignInBtn">
+        <span class="google-icon"></span>
+        Continue with Google
+      </button>
+
+      <div class="form-footer-link mt-24">
+        Don't have an account? <span onclick="navigate('signup')">Sign up free →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SIGNUP PAGE ===================== -->
+<section id="signup" class="page">
+  <div class="form-page">
+    <div class="form-page-header">
+      <button class="back-btn" onclick="navigate('home')">←</button>
+      <div class="form-page-title">Create Account</div>
+    </div>
+    <div class="form-body">
+      <div class="form-headline animate-in">
+        <h2>Join TKT<br>Mechanics</h2>
+        <p>Get access to trusted mechanics in your area.</p>
+      </div>
+
+      <form id="signUpForm" class="stagger">
+        <div class="form-field">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="fullName" class="form-input" placeholder="John Doe" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="signUpEmail" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Password</label>
+          <input type="password" id="signUpPassword" class="form-input" placeholder="Min. 8 characters" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">ID Number</label>
+          <input type="text" id="idNumber" class="form-input" placeholder="Your ID number" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Address</label>
+          <input type="text" id="address" class="form-input" placeholder="Your residential address" required>
+        </div>
+        <button type="submit" class="pill-btn pill-btn-primary pill-btn-full pill-btn-lg mt-8">Create Account →</button>
+      </form>
+
+      <div class="form-footer-link mt-24">
+        Already have an account? <span onclick="navigate('login')">Sign in</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD ===================== -->
+<section id="dashboard" class="page">
+
+  <!-- ADMIN DASHBOARD -->
+  <div id="adminDashboard" class="hidden">
+    <div class="dash-header">
+      <div class="dash-header-top">
+        <div>
+          <div class="dash-greeting">Dashboard</div>
+          <div class="dash-name" id="adminName">Admin</div>
+        </div>
+        <div class="dash-role-badge">Admin</div>
+      </div>
+    </div>
+    <div class="dash-body stagger">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card-num" id="totalClients">0</div>
+          <div class="stat-card-label">Clients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="totalMechanics">0</div>
+          <div class="stat-card-label">Mechanics</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="pendingRequests">0</div>
+          <div class="stat-card-label">Pending</div>
+        </div>
+      </div>
+
+      <button class="collapse-toggle" id="openMechanicForm">＋ Register New Mechanic</button>
+
+      <div class="mechanic-form-wrap" id="mechanicFormContainer">
+        <form id="mechanicForm" class="stagger">
+          <div class="form-field"><label class="form-label">First Name</label><input type="text" id="mechName" class="form-input" placeholder="Name" required></div>
+          <div class="form-field"><label class="form-label">Surname</label><input type="text" id="mechSurname" class="form-input" placeholder="Surname" required></div>
+          <div class="form-field"><label class="form-label">Residential Address</label><input type="text" id="mechAddress" class="form-input" placeholder="Address" required></div>
+          <div class="form-field"><label class="form-label">Contact Number</label><input type="text" id="mechContact" class="form-input" placeholder="Phone number" required></div>
+          <div class="form-field"><label class="form-label">Email</label><input type="email" id="mechEmail" class="form-input" placeholder="mechanic@email.com" required></div>
+          <div class="form-field"><label class="form-label">Password</label><input type="password" id="mechPassword" class="form-input" placeholder="Password" required></div>
+          <div class="form-field">
+            <label class="form-label">Fuel Type Speciality</label>
+            <select id="mechFuel" class="form-input" required>
+              <option value="">Select</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Both">Both</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Main Problem Type</label>
+            <select id="mechproblemtype" class="form-input" required>
+              <option value="Engine">Engine</option>
+              <option value="Wires">Wires</option>
+              <option value="Brakes">Brakes</option>
+              <option value="Tires">Tires</option>
+              <option value="Battery">Battery</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Car Types (hold Ctrl/Cmd for multi-select)</label>
+            <select id="mechCars" class="form-input" multiple required style="height:130px;">
+              <option>Hyundai</option><option>Honda</option><option>BMW</option>
+              <option>Mercedes Benz</option><option>Toyota</option><option>VW</option>
+              <option>Nissan</option><option>Isuzu</option><option>SUV</option><option>Trucks</option>
+            </select>
+          </div>
+          <button type="submit" class="pill-btn pill-btn-primary pill-btn-full mt-8">Save Mechanic</button>
+        </form>
+      </div>
+
+      <div class="section-title">Client Requests</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Client</th><th>Vehicle</th><th>Problem</th><th>Location</th><th>Status</th><th>Payment</th></tr></thead>
+          <tbody id="requestsTable"></tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Mechanics</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Approved</th><th>Action</th></tr></thead>
+          <tbody id="mechanicsTable"></tbody>
+        </table>
+      </div>
+
+      <button class="pill-btn pill-btn-coral pill-btn-full" id="logoutBtn">Log Out</button>
+    </div>
+  </div>
+
+  <!-- MECHANIC DASHBOARD -->
+  <div id="mechanicDashboard" class="hidden">
+    <div class="dash-header">
+      <div class="dash-header-top">
+        <div>
+          <div class="dash-greeting">Dashboard</div>
+          <div class="dash-name" id="welcomeMechanic">Mechanic</div>
+        </div>
+        <div class="dash-role-badge" style="background:rgba(255,179,71,0.12);border-color:rgba(255,179,71,0.3);color:var(--amber);">Mechanic</div>
+      </div>
+    </div>
+    <div class="dash-body stagger">
+      <div class="section-title">Assigned Jobs</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Client</th><th>Vehicle</th><th>Problem</th><th>Status</th></tr></thead>
+          <tbody id="mechanicJobs"></tbody>
+        </table>
+      </div>
+      <button class="pill-btn pill-btn-coral pill-btn-full" id="mechanicLogout">Log Out</button>
+    </div>
+  </div>
+
+  <!-- CLIENT DASHBOARD -->
+  <div id="clientDashboard" class="hidden">
+    <div class="dash-header">
+      <div class="dash-header-top">
+        <div>
+          <div class="dash-greeting">Dashboard</div>
+          <div class="dash-name" id="welcomeUser">Client</div>
+        </div>
+        <div class="dash-role-badge" style="background:rgba(255,107,91,0.12);border-color:rgba(255,107,91,0.3);color:var(--coral);">Client</div>
+      </div>
+    </div>
+    <div class="dash-body stagger">
+      <div class="section-title">Submit a Service Request</div>
+      <form id="serviceForm">
+        <div class="form-field"><label class="form-label">Booking Date</label><input type="date" id="bookingDate" class="form-input" required></div>
+        <div class="form-field"><label class="form-label">Booking Time</label><input type="time" id="bookingTime" class="form-input" required></div>
+        <div class="form-field">
+          <label class="form-label">Vehicle Type</label>
+          <select id="vehicleType" class="form-input" required>
+            <option value="">Select vehicle</option>
+            <option>Sedan</option><option>SUV</option><option>Truck</option><option>Van</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Problem Type</label>
+          <select id="problemType" class="form-input" required>
+            <option value="">Select problem</option>
+            <option>Engine</option><option>Brakes</option><option>Electrical</option><option>Tires</option><option>Battery</option>
+          </select>
+        </div>
+        <div class="form-field"><label class="form-label">Description</label><textarea id="description" class="form-input" placeholder="Describe the problem in detail…" required></textarea></div>
+        <div class="form-field"><label class="form-label">Location</label><input type="text" id="location" class="form-input" placeholder="Your current location" required></div>
+        <div class="form-field">
+          <label class="form-label">Urgency Level</label>
+          <select id="urgency" class="form-input" required>
+            <option value="">Select urgency</option>
+            <option value="low">🟢 Low</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="high">🔴 High</option>
+          </select>
+        </div>
+        <button type="submit" class="pill-btn pill-btn-primary pill-btn-full pill-btn-lg">Submit Request →</button>
+      </form>
+      <button class="pill-btn pill-btn-coral pill-btn-full mt-16" id="clientLogout">Log Out</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SAFE & RELIABLE MODAL ===================== -->
+<div class="sr-overlay" id="safeReliableModal">
+  <div class="sr-sheet">
+    <div class="modal-handle"></div>
+
+    <!-- Header — always visible, never scrolls -->
+    <div class="sr-head">
+      <div>
+        <div class="modal-title">Safe &amp; Reliable</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;font-family:'Barlow',sans-serif;">24/7 · Verified · Customer First</div>
+      </div>
+      <button class="modal-close" id="closeSafeModal" aria-label="Close">✕</button>
+    </div>
+
+    <!-- Tab nav — always visible, never scrolls -->
+    <div class="sr-tab-nav">
+      <div class="tab-item active" data-card="sCard1">Trust</div>
+      <div class="tab-item" data-card="sCard2">Mechanics</div>
+      <div class="tab-item" data-card="sCard3">Reviews</div>
+      <div class="tab-item" data-card="sCard4">Complaints</div>
+    </div>
+
+    <!-- Scrollable content only -->
+    <div class="sr-body">
+      <!-- Trust -->
+      <div id="sCard1" class="tab-panel active">
+        <div class="trust-grid stagger">
+          <div class="trust-card"><div class="trust-icon">✅</div><div class="trust-title">Verified Mechanics</div><div class="trust-desc">All mechanics go through a rigorous vetting process.</div></div>
+          <div class="trust-card"><div class="trust-icon">🚨</div><div class="trust-title">24/7 Emergency</div><div class="trust-desc">Round-the-clock emergency support available.</div></div>
+          <div class="trust-card"><div class="trust-icon">⭐</div><div class="trust-title">Real Reviews</div><div class="trust-desc">Genuine feedback from real customers only.</div></div>
+          <div class="trust-card"><div class="trust-icon">🔒</div><div class="trust-title">Secure Service</div><div class="trust-desc">Your data and bookings are always protected.</div></div>
+        </div>
+      </div>
+
+      <!-- Mechanics -->
+      <div id="sCard2" class="tab-panel">
+        <div class="mech-card"><div class="mech-avatar">HM</div><div><div class="mech-name">Hidlur Mashaba</div><div class="mech-stars">★★★★☆</div></div></div>
+        <div class="mech-card"><div class="mech-avatar">PS</div><div><div class="mech-name">Pearl Semenya</div><div class="mech-stars">★★★★★</div></div></div>
+        <div class="mech-card"><div class="mech-avatar">TN</div><div><div class="mech-name">Thabo Nkosi</div><div class="mech-stars">★★★★☆</div></div></div>
+      </div>
+
+      <!-- Reviews -->
+      <div id="sCard3" class="tab-panel">
+        <div class="glass-card" style="background:var(--card-bg); margin-bottom:0;">
+          <div class="section-title" style="margin-bottom:18px;">Leave a Review</div>
+          <form id="reviewForm">
+            <div class="form-field"><label class="form-label">Your Name</label><input type="text" id="reviewName" class="form-input" placeholder="Jane Doe" required></div>
+            <div class="form-field">
+              <label class="form-label">Rating</label>
+              <div class="star-rating">
+                <span data-value="1">☆</span><span data-value="2">☆</span>
+                <span data-value="3">☆</span><span data-value="4">☆</span>
+                <span data-value="5">☆</span>
+              </div>
+              <input type="hidden" id="reviewRating" value="0">
+            </div>
+            <div class="form-field"><label class="form-label">Review</label><textarea id="reviewText" class="form-input" placeholder="Share your experience…" required></textarea></div>
+            <button type="submit" class="pill-btn pill-btn-primary pill-btn-full">Submit Review</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Complaints -->
+      <div id="sCard4" class="tab-panel">
+        <div class="glass-card" style="background:var(--card-bg); margin-bottom:0;">
+          <div class="section-title" style="margin-bottom:18px;">Report a Complaint</div>
+          <form id="complaintForm">
+            <div class="form-field"><label class="form-label">Your Name</label><input type="text" id="complaintName" class="form-input" placeholder="Jane Doe" required></div>
+            <div class="form-field"><label class="form-label">Your Issue</label><textarea id="complaintText" class="form-input" placeholder="Describe your issue in detail…" required></textarea></div>
+            <button type="submit" class="pill-btn pill-btn-coral pill-btn-full">Send Complaint</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== FIND MECHANIC MODAL ===================== -->
+<div class="modal-overlay" id="findMechanicModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="modal-title">Find a Mechanic</div>
+      <button class="modal-close" id="closeFindModal" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="quickRequestForm" class="stagger">
+        <div class="form-field">
+          <label class="form-label">Vehicle Type</label>
+          <select id="qVehicleType" class="form-input" required>
+            <option value="">Select vehicle</option>
+            <option>Toyota</option><option>BMW</option><option>VW</option>
+            <option>Honda</option><option>Hyundai</option><option>Nissan</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Problem Type</label>
+          <select id="qProblemType" class="form-input" required>
+            <option value="">Select problem</option>
+            <option>Engine</option><option>Brakes</option><option>Battery</option>
+            <option>Electrical</option><option>Tires</option>
+          </select>
+        </div>
+        <div class="form-field"><label class="form-label">Location</label><input type="text" id="qLocation" class="form-input" placeholder="Your location" required></div>
+        <div class="form-field"><label class="form-label">Description</label><textarea id="qDescription" class="form-input" placeholder="What's wrong with your car?" rows="3"></textarea></div>
+        <button type="submit" class="pill-btn pill-btn-primary pill-btn-full pill-btn-lg">Find Mechanic →</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RESET PASSWORD MODAL ===================== -->
+<div class="reset-modal-overlay" id="resetModal">
+  <div class="reset-modal-box">
+    <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;margin-bottom:8px;text-transform:uppercase;color:var(--white);">Reset Password</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">Enter your email and we'll send you a reset link.</p>
+    <div class="form-field">
+      <label class="form-label">Email Address</label>
+      <input type="email" id="resetEmail" class="form-input" placeholder="you@example.com" required>
+    </div>
+    <button class="pill-btn pill-btn-primary pill-btn-full pill-btn-lg mt-8" id="sendResetEmail">Send Reset Link</button>
+    <button class="pill-btn pill-btn-ghost pill-btn-full mt-8" id="closeResetModal">Cancel</button>
+  </div>
+</div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script>
+/* ============================================================
+   DESKTOP LAYOUT SWITCH
+   ============================================================ */
+function applyDesktopLayout() {
+  const isDesktop = window.innerWidth >= 900;
+  const mobileHome = document.querySelector('.desktop-hide-when-large');
+  const desktopHome = document.getElementById('desktopHomeLayout');
+  if (mobileHome && desktopHome) {
+    mobileHome.style.display = isDesktop ? 'none' : 'block';
+    desktopHome.style.display = isDesktop ? 'grid' : 'none';
+  }
+}
+applyDesktopLayout();
+window.addEventListener('resize', applyDesktopLayout);
+
+/* ============================================================
+   DARK MODE TOGGLE
+   ============================================================ */
+const html = document.documentElement;
+const dmToggle = document.getElementById('darkModeToggle');
+const dmLabel  = document.getElementById('dmLabel');
+const dmIcon   = document.getElementById('dmIcon');
+
+// Load saved preference
+const savedTheme = localStorage.getItem('tkt-theme') || 'dark';
+html.setAttribute('data-theme', savedTheme);
+updateDMToggleUI(savedTheme);
+
+dmToggle.addEventListener('click', () => {
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('tkt-theme', next);
+  updateDMToggleUI(next);
+});
+
+function updateDMToggleUI(theme) {
+  if (theme === 'dark') {
+    dmLabel.textContent = 'Dark';
+    dmIcon.textContent = '🌙';
+  } else {
+    dmLabel.textContent = 'Light';
+    dmIcon.textContent = '☀️';
+  }
+}
+
+/* ============================================================
+   SPA Navigation
+   ============================================================ */
+function navigate(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+}
+
+/* ============================================================
+   Toast Notification System
+   ============================================================ */
+function showToast(msg, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('out');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+/* ============================================================
+   Modal helpers
+   ============================================================ */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('closeFindModal').addEventListener('click', () => closeModal('findMechanicModal'));
+document.getElementById('findMechanicModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('findMechanicModal')) closeModal('findMechanicModal');
+});
+
+document.getElementById('closeResetModal').addEventListener('click', () => closeModal('resetModal'));
+document.getElementById('resetModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('resetModal')) closeModal('resetModal');
+});
+
+/* ============================================================
+   Safe & Reliable modal
+   ============================================================ */
+document.getElementById('safeReliableCard').addEventListener('click', () => openModal('safeReliableModal'));
+document.getElementById('safeReliableCardDesk').addEventListener('click', () => openModal('safeReliableModal'));
+document.getElementById('closeSafeModal').addEventListener('click', () => closeModal('safeReliableModal'));
+document.getElementById('safeReliableModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('safeReliableModal')) closeModal('safeReliableModal');
+});
+
+/* ============================================================
+   Safe & Reliable tab switching — SHEET STAYS STILL
+   The sr-body scrolls independently. Only tab-panel visibility
+   changes; the sheet height and position are fixed by CSS.
+   ============================================================ */
+document.querySelectorAll('#safeReliableModal .tab-item').forEach(tab => {
+  tab.addEventListener('click', () => {
+    // Remove active from all tabs
+    document.querySelectorAll('#safeReliableModal .tab-item').forEach(t => t.classList.remove('active'));
+    // Hide all panels (no layout shift — they're positioned inside fixed-height sr-body)
+    document.querySelectorAll('#safeReliableModal .tab-panel').forEach(p => p.classList.remove('active'));
+    // Activate selected
+    tab.classList.add('active');
+    const target = document.getElementById(tab.dataset.card);
+    if (target) {
+      target.classList.add('active');
+      // Reset scroll position of sr-body so new panel starts at top
+      document.querySelector('#safeReliableModal .sr-body').scrollTop = 0;
+    }
+  });
+});
+
+/* ============================================================
+   Find Mechanic card click
+   ============================================================ */
+document.getElementById('findMechanicCard').addEventListener('click', () => openModal('findMechanicModal'));
+document.getElementById('findMechanicCardDesk').addEventListener('click', () => openModal('findMechanicModal'));
+
+/* ============================================================
+   Track Service
+   ============================================================ */
+document.getElementById('trackService').addEventListener('click', () => showToast('Service tracking coming soon!', 'info'));
+document.getElementById('trackServiceDesk').addEventListener('click', () => showToast('Service tracking coming soon!', 'info'));
+
+/* ============================================================
+   Star rating
+   ============================================================ */
+const stars = document.querySelectorAll('.star-rating span');
+const ratingInput = document.getElementById('reviewRating');
+
+stars.forEach(star => {
+  star.addEventListener('click', () => {
+    const val = parseInt(star.dataset.value);
+    ratingInput.value = val;
+    stars.forEach((s, i) => {
+      s.textContent = i < val ? '★' : '☆';
+      s.classList.toggle('active', i < val);
+    });
+  });
+  star.addEventListener('mouseover', () => {
+    const val = parseInt(star.dataset.value);
+    stars.forEach((s, i) => s.textContent = i < val ? '★' : '☆');
+  });
+  star.addEventListener('mouseout', () => {
+    const cur = parseInt(ratingInput.value);
+    stars.forEach((s, i) => s.textContent = i < cur ? '★' : '☆');
+  });
+});
+
+/* ============================================================
+   Collapse mechanic form toggle
+   ============================================================ */
+document.getElementById('openMechanicForm').addEventListener('click', () => {
+  const wrap = document.getElementById('mechanicFormContainer');
+  const isOpen = wrap.style.display === 'block';
+  wrap.style.display = isOpen ? 'none' : 'block';
+  document.getElementById('openMechanicForm').textContent = isOpen ? '＋ Register New Mechanic' : '✕ Close Form';
+});
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getDatabase, ref, push, onValue, get, update
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyApRxINWbxP7okdLIrx-Fg5ayMOGrYjz6w",
+  authDomain: "engineering-c438b.firebaseapp.com",
+  databaseURL: "https://engineering-c438b-default-rtdb.firebaseio.com",
+  projectId: "engineering-c438b",
+  storageBucket: "engineering-c438b.appspot.com",
+  messagingSenderId: "414307147987",
+  appId: "1:414307147987:web:65819f765c6aba7c263426"
+};
+
+const app      = initializeApp(firebaseConfig);
+const auth     = getAuth(app);
+const database = getDatabase(app);
+
+let clientLatitude = null;
+let clientLongitude = null;
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(pos => {
+    clientLatitude  = pos.coords.latitude;
+    clientLongitude = pos.coords.longitude;
+  });
+}
+
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function updateNav(loggedIn) {
+  document.getElementById('navButtons').classList.toggle('hidden', loggedIn);
+  document.getElementById('navUserArea').classList.toggle('hidden', !loggedIn);
+}
+
+document.getElementById('mainLogoutBtn').addEventListener('click', () => {
+  signOut(auth).then(() => { updateNav(false); navigate('home'); showToast('Signed out.', 'info'); });
+});
+
+const googleProvider = new GoogleAuthProvider();
+document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user   = result.user;
+    const snap   = await get(ref(database, 'users/' + user.uid));
+    if (!snap.exists()) {
+      await update(ref(database, 'users/' + user.uid), {
+        fullName: user.displayName, email: user.email,
+        role: 'client', createdAt: new Date().toISOString()
+      });
+    }
+    updateNav(true);
+    showToast('Welcome, ' + user.displayName + '!', 'success');
+    showDashboard('client', snap.exists() ? snap.val() : { fullName: user.displayName });
+  } catch (err) {
+    showToast('Google Sign-In failed: ' + err.message, 'error');
+  }
+});
+
+document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  openModal('resetModal');
+});
+
+document.getElementById('sendResetEmail').addEventListener('click', async () => {
+  const email = document.getElementById('resetEmail').value;
+  if (!email) { showToast('Email is required', 'error'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showToast('Reset link sent! Check your inbox.', 'success');
+    closeModal('resetModal');
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+});
+
+document.getElementById('signUpForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fullName = document.getElementById('fullName').value;
+  const email    = document.getElementById('signUpEmail').value;
+  const password = document.getElementById('signUpPassword').value;
+  const idNumber = document.getElementById('idNumber').value;
+  const address  = document.getElementById('address').value;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await update(ref(database, 'users/' + cred.user.uid), {
+      fullName, email, idNumber, address, role: 'client',
+      createdAt: new Date().toISOString()
+    });
+    showToast('Account created! Please sign in.', 'success');
+    navigate('login');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email    = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const role     = document.getElementById('role').value;
+  if (!role) { showToast('Please select a role.', 'error'); return; }
+  try {
+    const cred  = await signInWithEmailAndPassword(auth, email, password);
+    const snap  = await get(ref(database, 'users/' + cred.user.uid));
+    if (!snap.exists()) throw new Error('User record not found.');
+    const data  = snap.val();
+    if (data.role !== role) {
+      showToast(`Role mismatch! You are registered as ${data.role}.`, 'error');
+      await signOut(auth);
+      return;
+    }
+    updateNav(true);
+    showToast('Welcome back, ' + data.fullName + '!', 'success');
+    showDashboard(data.role, data);
+
+    const pending = localStorage.getItem('pendingRequest');
+    if (pending) {
+      const reqData = JSON.parse(pending);
+      await push(ref(database, 'serviceRequests'), {
+        clientId: cred.user.uid, clientName: cred.user.email,
+        ...reqData, status: 'pending', paymentStatus: 'unpaid',
+        createdAt: Date.now()
+      });
+      localStorage.removeItem('pendingRequest');
+      showToast('Your pending request has been submitted!', 'success');
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  signOut(auth).then(() => { updateNav(false); navigate('home'); });
+});
+document.getElementById('clientLogout').addEventListener('click', () => {
+  signOut(auth).then(() => { updateNav(false); navigate('home'); });
+});
+document.getElementById('mechanicLogout').addEventListener('click', () => {
+  signOut(auth).then(() => { updateNav(false); navigate('home'); });
+});
+
+function showDashboard(role, data) {
+  document.getElementById('adminDashboard').classList.add('hidden');
+  document.getElementById('mechanicDashboard').classList.add('hidden');
+  document.getElementById('clientDashboard').classList.add('hidden');
+
+  if (role === 'admin') {
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    document.getElementById('adminName').textContent = data.fullName || 'Admin';
+    loadAdminData();
+    loadRequestsAdmin();
+  } else if (role === 'mechanic') {
+    document.getElementById('mechanicDashboard').classList.remove('hidden');
+    document.getElementById('welcomeMechanic').textContent = data.fullName || 'Mechanic';
+    loadMechanicData();
+  } else {
+    document.getElementById('clientDashboard').classList.remove('hidden');
+    document.getElementById('welcomeUser').textContent = data.fullName || 'Client';
+    attachClientSubmitHandler();
+  }
+  navigate('dashboard');
+}
+
+function loadRequestsAdmin() {
+  onValue(ref(database, 'serviceRequests'), snap => {
+    const table = document.getElementById('requestsTable');
+    table.innerHTML = '';
+    if (!snap.exists()) return;
+    snap.forEach(child => {
+      const r = child.val();
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${r.clientName || ''}</td>
+        <td>${r.vehicleType || ''}</td>
+        <td>${r.problemType || ''}</td>
+        <td>${r.location || ''}</td>
+        <td><span class="status-pill status-${r.status === 'pending' ? 'pending' : 'assigned'}">${r.status}</span></td>
+        <td><span class="status-pill ${r.paymentStatus === 'paid' ? 'status-paid' : 'status-unpaid'}">${r.paymentStatus}</span></td>
+      `;
+      table.appendChild(row);
+    });
+  });
+}
+
+async function loadAdminData() {
+  const snap = await get(ref(database, 'users'));
+  let clients = 0, mechanics = 0;
+  const table = document.getElementById('mechanicsTable');
+  table.innerHTML = '';
+
+  snap.forEach(child => {
+    const d = child.val();
+    const uid = child.key;
+    if (d.role === 'client')   clients++;
+    if (d.role === 'mechanic') mechanics++;
+    if (d.role === 'mechanic') {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${d.fullName || ''}</td>
+        <td>${d.email || ''}</td>
+        <td><span class="status-pill ${d.approved ? 'status-assigned' : 'status-pending'}">${d.approved ? 'Yes' : 'No'}</span></td>
+        <td>${d.approved ? '—' : `<button class="approve-btn" data-id="${uid}">Approve</button>`}</td>
+      `;
+      table.appendChild(row);
+    }
+  });
+
+  document.getElementById('totalClients').textContent   = clients;
+  document.getElementById('totalMechanics').textContent = mechanics;
+
+  const reqSnap = await get(ref(database, 'serviceRequests'));
+  let pending = 0;
+  if (reqSnap.exists()) reqSnap.forEach(c => { if (c.val().status === 'pending') pending++; });
+  document.getElementById('pendingRequests').textContent = pending;
+
+  document.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await update(ref(database, 'users/' + btn.dataset.id), { approved: true });
+      showToast('Mechanic approved!', 'success');
+      loadAdminData();
+    });
+  });
+}
+
+async function assignMechanics(requestId, vehicleType, problemType, cLat, cLng) {
+  const snap = await get(ref(database, 'users'));
+  if (!snap.exists()) return;
+  let matches = [];
+  snap.forEach(child => {
+    const m = child.val();
+    if (m.role !== 'mechanic' || !m.approved) return;
+    if (m.carTypes?.includes(vehicleType) && m.focus === problemType) {
+      matches.push({ id: child.key, lat: m.lat || 0, lng: m.lng || 0 });
+    }
+  });
+  if (!matches.length) return;
+  if (cLat && cLng && matches.length > 1) {
+    matches.sort((a, b) => getDistance(cLat, cLng, a.lat, a.lng) - getDistance(cLat, cLng, b.lat, b.lng));
+  }
+  const best = matches[0];
+  await update(ref(database, 'serviceRequests/' + requestId), {
+    assignedMechanics: [best.id], status: 'assigned'
+  });
+}
+
+function loadMechanicData() {
+  const user = auth.currentUser;
+  if (!user) return;
+  onValue(ref(database, 'serviceRequests'), snap => {
+    const table = document.getElementById('mechanicJobs');
+    table.innerHTML = '';
+    if (!snap.exists()) return;
+    snap.forEach(child => {
+      const job = child.val();
+      if (job.assignedMechanics?.includes(user.uid)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${job.clientName || 'Client'}</td>
+          <td>${job.vehicleType}</td>
+          <td>${job.problemType}</td>
+          <td><span class="status-pill status-${job.status === 'pending' ? 'pending' : 'assigned'}">${job.status}</span></td>
+        `;
+        table.appendChild(row);
+      }
+    });
+  });
+}
+
+document.getElementById('mechanicForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const name     = document.getElementById('mechName').value;
+  const surname  = document.getElementById('mechSurname').value;
+  const address  = document.getElementById('mechAddress').value;
+  const contact  = document.getElementById('mechContact').value;
+  const email    = document.getElementById('mechEmail').value;
+  const password = document.getElementById('mechPassword').value;
+  const fuelType = document.getElementById('mechFuel').value;
+  const focus    = document.getElementById('mechproblemtype').value;
+  const carSelect = document.getElementById('mechCars');
+  const vehicleTypes = Array.from(carSelect.selectedOptions).map(o => o.value);
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await update(ref(database, 'users/' + cred.user.uid), {
+      fullName: name + ' ' + surname, email, address, contact,
+      fuelType, focus, vehicleTypes, role: 'mechanic',
+      approved: false, createdAt: new Date().toISOString()
+    });
+    showToast('Mechanic registered successfully!', 'success');
+    this.reset();
+    document.getElementById('mechanicFormContainer').style.display = 'none';
+    document.getElementById('openMechanicForm').textContent = '＋ Register New Mechanic';
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+});
+
+function attachClientSubmitHandler() {
+  const form = document.getElementById('serviceForm');
+  if (form.dataset.listener) return;
+  form.dataset.listener = 'true';
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) { showToast('Please login first.', 'error'); return; }
+
+    const payload = {
+      clientId: user.uid,
+      clientName: user.email,
+      bookingDate:  document.getElementById('bookingDate').value,
+      bookingTime:  document.getElementById('bookingTime').value,
+      vehicleType:  document.getElementById('vehicleType').value,
+      problemType:  document.getElementById('problemType').value,
+      description:  document.getElementById('description').value,
+      location:     document.getElementById('location').value,
+      urgency:      document.getElementById('urgency').value,
+      status:       'pending',
+      paymentStatus:'unpaid',
+      assignedMechanics: [],
+      createdAt:    new Date().toISOString()
+    };
+
+    try {
+      const newRef = await push(ref(database, 'serviceRequests'), payload);
+      await assignMechanics(newRef.key, payload.vehicleType, payload.problemType, clientLatitude, clientLongitude);
+      showToast('Request submitted successfully!', 'success');
+      form.reset();
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  });
+}
+
+document.getElementById('quickRequestForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const user = auth.currentUser;
+  const data = {
+    vehicleType:  document.getElementById('qVehicleType').value,
+    problemType:  document.getElementById('qProblemType').value,
+    location:     document.getElementById('qLocation').value,
+    description:  document.getElementById('qDescription').value
+  };
+
+  if (!user) {
+    localStorage.setItem('pendingRequest', JSON.stringify(data));
+    showToast('Please login to submit your request.', 'info');
+    closeModal('findMechanicModal');
+    navigate('login');
+    return;
+  }
+  try {
+    await push(ref(database, 'serviceRequests'), {
+      clientId: user.uid, clientName: user.email,
+      ...data, status: 'pending', paymentStatus: 'unpaid',
+      createdAt: Date.now()
+    });
+    showToast('Request sent successfully!', 'success');
+    closeModal('findMechanicModal');
+    document.getElementById('quickRequestForm').reset();
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  }
+});
+
+document.getElementById('reviewForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name   = document.getElementById('reviewName').value.trim();
+  const text   = document.getElementById('reviewText').value.trim();
+  const rating = parseInt(document.getElementById('reviewRating').value);
+  if (!rating) { showToast('Please select a star rating.', 'error'); return; }
+  try {
+    await push(ref(database, 'reviews'), {
+      name, text, rating, createdAt: new Date().toISOString()
+    });
+    showToast('Thank you for your review, ' + name + '!', 'success');
+    document.getElementById('reviewForm').reset();
+    document.querySelectorAll('.star-rating span').forEach(s => s.textContent = '☆');
+    document.getElementById('reviewRating').value = 0;
+  } catch (err) {
+    showToast('Error submitting review.', 'error');
+  }
+});
+
+document.getElementById('complaintForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = document.getElementById('complaintName').value.trim();
+  const text = document.getElementById('complaintText').value.trim();
+  try {
+    await push(ref(database, 'complaints'), {
+      name, text, status: 'pending', createdAt: new Date().toISOString()
+    });
+    showToast("Complaint submitted. We'll look into it.", 'success');
+    document.getElementById('complaintForm').reset();
+  } catch (err) {
+    showToast('Error sending complaint.', 'error');
+  }
+});
+</script>
+</body>
+</html>
